@@ -69,7 +69,7 @@ public struct Model3DView: ViewRepresentable {
 	// MARK: - Private implementations
 	private func makeView(context: Context) -> SCNView {
 		let view = SCNView()
-		view.autoenablesDefaultLighting = true
+//		view.autoenablesDefaultLighting = true
 		view.backgroundColor = .clear
 
 		// Framerate
@@ -202,6 +202,12 @@ extension Model3DView {
 
 			contentNode.name = "Content"
 			scene.rootNode.addChildNode(contentNode)
+            
+            let lightNode: SCNNode = .init()
+            lightNode.light = .init()
+            lightNode.light!.intensity = 3000
+            lightNode.light!.type = .ambient
+            scene.rootNode.addChildNode(lightNode)
 
 			super.init()
 		}
@@ -302,7 +308,7 @@ extension Model3DView {
 
 			Task { @MainActor in
 				for onLoad in self.onLoadHandlers {
-					onLoad(.success)
+					onLoad(.success(copiedRoot))
 				}
 			}
 		}

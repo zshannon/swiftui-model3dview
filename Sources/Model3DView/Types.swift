@@ -18,7 +18,7 @@ typealias ViewRepresentable = UIViewRepresentable
 typealias IBLValues = (url: URL, intensity: Double)
 
 public enum ModelLoadState {
-	case success
+	case success(SCNNode)
 	case failure
 }
 
