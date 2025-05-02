@@ -308,7 +308,7 @@ extension Model3DView {
 
 			Task { @MainActor in
 				for onLoad in self.onLoadHandlers {
-					onLoad(.success(copiedRoot))
+					onLoad(.success(view, copiedRoot))
 				}
 			}
 		}
