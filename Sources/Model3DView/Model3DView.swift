@@ -165,7 +165,7 @@ extension Model3DView {
 		private static let sceneCache = AsyncResourcesCache<URL, SCNScene>()
 
 		// MARK: -
-		private weak var view: SCNView!
+		private weak var view: SCNView = nil
 
 		private let cameraNode = SCNNode()
 		private let contentNode = SCNNode()
@@ -215,9 +215,21 @@ extension Model3DView {
 		// MARK: - Setting scene properties.
 		fileprivate func setView(_ sceneView: SCNView) {
 			view = sceneView
-			view.delegate = self
-			view.pointOfView = cameraNode
-			view.scene = scene
+			view!.delegate = self
+			view!.pointOfView = cameraNode
+			view!.scene = scene
+			if needsOnLoad {
+				Task { @MainActor in
+					guard let loadedScene else {
+						return 
+					}
+					let copiedRoot = loadedScene.rootNode.clone()
+					for onLoad in self.onLoadHandlers {
+						// BUG: this is happening before `view` is set in `setView`
+						onLoad(.success(view, copiedRoot))
+					}
+				}
+			}
 		}
 
 		fileprivate func setSceneFile(_ sceneFile: SceneFileType) {
@@ -274,6 +286,7 @@ extension Model3DView {
 			}
 		}
 
+		private var needsOnLoad: Bool = false
 		private func prepareScene() {
 			contentNode.childNodes.forEach { $0.removeFromParentNode() }
 
@@ -307,7 +320,12 @@ extension Model3DView {
 			contentNode.addChildNode(copiedRoot)
 
 			Task { @MainActor in
+				guard let view else { 
+					self.needsOnLoad = true
+					return 
+				}
 				for onLoad in self.onLoadHandlers {
+					// BUG: this is happening before `view` is set in `setView`
 					onLoad(.success(view, copiedRoot))
 				}
 			}
@@ -367,6 +385,7 @@ extension Model3DView {
  */
 extension Model3DView.SceneCoordinator: SCNSceneRendererDelegate {
 	public func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+		guard let view else { return }
 		// Update the content node.
 		contentNode.simdTransform = Matrix4x4(scale: Vector3(repeating: contentScale)) * transform
 		
