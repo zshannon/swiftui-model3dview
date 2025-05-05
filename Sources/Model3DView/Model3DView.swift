@@ -226,7 +226,7 @@ extension Model3DView {
 					let copiedRoot = loadedScene.rootNode.clone()
 					for onLoad in self.onLoadHandlers {
 						// BUG: this is happening before `view` is set in `setView`
-						onLoad(.success(view, copiedRoot))
+						onLoad(.success(view!, copiedRoot))
 					}
 				}
 			}
