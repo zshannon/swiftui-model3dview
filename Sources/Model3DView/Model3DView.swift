@@ -165,7 +165,7 @@ extension Model3DView {
 		private static let sceneCache = AsyncResourcesCache<URL, SCNScene>()
 
 		// MARK: -
-		private weak var view: SCNView = nil
+		private weak var view: SCNView? = nil
 
 		private let cameraNode = SCNNode()
 		private let contentNode = SCNNode()
